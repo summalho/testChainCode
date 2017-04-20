@@ -41,7 +41,7 @@ type UserAddress struct {
 	zip         string `json:"zip"`
 }
 
-func (t *SimpleChaincode) registerNewUser(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+/*func (t *SimpleChaincode) registerNewUser(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 
 	fmt.Println("inside addNew User")
 
@@ -55,35 +55,35 @@ func (t *SimpleChaincode) registerNewUser(stub shim.ChaincodeStubInterface, args
 		return nil, errors.New("must have thirteen arguments")
 	}
 
-	var idString string
-	var tpoint string
+		var idString string
+		var tpoint string
 
-	idString = args[0]
-	fmt.Println("ID String")
-	fmt.Print(idString)
+		idString = args[0]
+		fmt.Println("ID String")
+		fmt.Print(idString)
 
-	tpoint = args[12]
-	fmt.Println("tPoint")
-	fmt.Print(tpoint)
+		tpoint = args[12]
+		fmt.Println("tPoint")
+		fmt.Print(tpoint)
 
-	id, err = strconv.Atoi(idString)
-	tPoint, err = strconv.Atoi(tpoint)
+		id, err = strconv.Atoi(idString)
+		tPoint, err = strconv.Atoi(tpoint)
 
-	newUser.ffId = id
-	newUser.title = args[1]
-	newUser.gender = args[2]
-	newUser.firstName = args[3]
-	newUser.lastName = args[4]
-	newUser.dob = args[5]
-	newUser.email = args[6]
-	newUser.userAdd.addressLine = args[7]
-	newUser.userAdd.city = args[8]
-	newUser.userAdd.zip = args[9]
-	newUser.userAdd.country = args[10]
-	newUser.createdBy = args[11]
-	newUser.totalPoint = tPoint
+		newUser.ffId = id
+		newUser.title = args[1]
+		newUser.gender = args[2]
+		newUser.firstName = args[3]
+		newUser.lastName = args[4]
+		newUser.dob = args[5]
+		newUser.email = args[6]
+		newUser.userAdd.addressLine = args[7]
+		newUser.userAdd.city = args[8]
+		newUser.userAdd.zip = args[9]
+		newUser.userAdd.country = args[10]
+		newUser.createdBy = args[11]
+		newUser.totalPoint = tPoint
 
-	newUserDataAddress = &newUser
+		newUserDataAddress = &newUser
 
 	newUserByteArray, err = json.Marshal(newUserDataAddress)
 
@@ -96,18 +96,31 @@ func (t *SimpleChaincode) registerNewUser(stub shim.ChaincodeStubInterface, args
 	return newUserByteArray, nil
 
 }
+*/
 
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	var err error
-	var newUserByteArray []byte
+	//var newUserByteArray []byte
+	var userId string
+	var userDetails string
 
 	fmt.Println("Inside Init . This is used to create an new User")
 	fmt.Println("Inside registerNewUser")
 
-	newUserByteArray, err = t.registerNewUser(stub, args)
+	userId = args[0]
+	userDetails = args[1]
 
-	return newUserByteArray, err
+	err = stub.PutState(userId, []byte(userDetails))
+
+	if err != nil {
+		fmt.Println("Could not save userDetails to ledger", err)
+		return nil, err
+
+	}
+	//newUserByteArray, err = t.registerNewUser(stub, args)
+
+	return nil, nil
 
 }
 
