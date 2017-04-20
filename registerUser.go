@@ -22,19 +22,15 @@ func main() {
 }
 
 type User struct {
-	ffId       int         `json:"ffid"`
-	title      string      `json:"title"`
-	gender     string      `json:"gender"`
-	firstName  string      `json:"firstname"`
-	lastName   string      `json:"lastname"`
-	dob        string      `json:"dob"`
-	email      string      `json:"email"`
-	userAdd    UserAddress `json:"userAdd"`
-	createdBy  string      `json:"createdBy"`
-	totalPoint int         `json:"totalPoint"`
-}
-
-type UserAddress struct {
+	ffId        int    `json:"ffid"`
+	title       string `json:"title"`
+	gender      string `json:"gender"`
+	firstName   string `json:"firstname"`
+	lastName    string `json:"lastname"`
+	dob         string `json:"dob"`
+	email       string `json:"email"`
+	createdBy   string `json:"createdBy"`
+	totalPoint  int    `json:"totalPoint"`
 	country     string `json:"country"`
 	addressLine string `json:"addressLine"`
 	city        string `json:"city"`
