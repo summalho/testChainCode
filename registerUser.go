@@ -97,17 +97,32 @@ type User struct {
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	var err error
-	//var newUserByteArray []byte
+	var newUserByteArray []byte
 	var userId string
-	var userDetails string
+	//var userDetails string
 
 	fmt.Println("Inside Init . This is used to create an new User")
 	fmt.Println("Inside registerNewUser")
 
-	userId = args[0]
-	userDetails = args[1]
+	var newUser User
 
-	err = stub.PutState(userId, []byte(userDetails))
+	newUser.ffId = args[0]
+	newUser.title = args[1]
+	newUser.gender = args[2]
+	newUser.firstName = args[3]
+	newUser.lastName = args[4]
+	newUser.dob = args[5]
+	newUser.email = args[6]
+	newUser.addressLine = args[7]
+	newUser.city = args[8]
+	newUser.zip = args[9]
+	newUser.country = args[10]
+	newUser.createdBy = args[11]
+	newUser.totalPoint = args[12]
+
+	newUserByteArray, err = json.Marshal(&newUser)
+
+	err = stub.PutState(userId, newUserByteArray)
 
 	if err != nil {
 		fmt.Println("Could not save userDetails to ledger", err)
@@ -153,7 +168,9 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 	fmt.Print("existingUser.totalPoint ")
 	fmt.Println(existingUser.totalPoint)
 
-	points = existingUser.totalPoint
+	pointsrecieved := existingUser.totalPoint
+
+	points, err = strconv.Atoi(pointsrecieved)
 
 	if function == "addPoints" {
 
@@ -172,7 +189,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 	}
 	fmt.Println("back from addPoints method inside invoke . points to be added are : ")
 
-	existingUser.totalPoint = newPoints
+	var finalPointsStr = strconv.Itoa(newPoints)
+	existingUser.totalPoint = finalPointsStr
 	userDataBytes, err = json.Marshal(&existingUser)
 
 	err = stub.PutState(userId, userDataBytes)
