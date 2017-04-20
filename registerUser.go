@@ -22,7 +22,7 @@ func main() {
 }
 
 type User struct {
-	ffId        int    `json:"ffid"`
+	ffId        string `json:"ffid"`
 	title       string `json:"title"`
 	gender      string `json:"gender"`
 	firstName   string `json:"firstname"`
@@ -30,7 +30,7 @@ type User struct {
 	dob         string `json:"dob"`
 	email       string `json:"email"`
 	createdBy   string `json:"createdBy"`
-	totalPoint  int    `json:"totalPoint"`
+	totalPoint  string `json:"totalPoint"`
 	country     string `json:"country"`
 	addressLine string `json:"addressLine"`
 	city        string `json:"city"`
