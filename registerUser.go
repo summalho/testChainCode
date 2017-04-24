@@ -22,116 +22,75 @@ func main() {
 }
 
 type User struct {
-	ffId        string `json:"ffid"`
-	title       string `json:"title"`
-	gender      string `json:"gender"`
-	firstName   string `json:"firstname"`
-	lastName    string `json:"lastname"`
-	dob         string `json:"dob"`
-	email       string `json:"email"`
-	createdBy   string `json:"createdBy"`
-	totalPoint  string `json:"totalPoint"`
-	country     string `json:"country"`
-	addressLine string `json:"addressLine"`
-	city        string `json:"city"`
-	zip         string `json:"zip"`
+	FfId       string
+	Title      string
+	Gender     string
+	FirstName  string
+	LastName   string
+	Dob        string
+	Email      string
+	Country    string
+	Address    string
+	City       string
+	Zip        string
+	CreatedBy  string
+	TotalPoint string
 }
 
-/*func (t *SimpleChaincode) registerNewUser(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-
-	fmt.Println("inside addNew User")
-
-	var newUser User
-	var newUserByteArray []byte
-	var err error
-	var id, tPoint int
-	var newUserDataAddress *User
-
-	if len(args) != 13 {
-		return nil, errors.New("must have thirteen arguments")
-	}
-
-		var idString string
-		var tpoint string
-
-		idString = args[0]
-		fmt.Println("ID String")
-		fmt.Print(idString)
-
-		tpoint = args[12]
-		fmt.Println("tPoint")
-		fmt.Print(tpoint)
-
-		id, err = strconv.Atoi(idString)
-		tPoint, err = strconv.Atoi(tpoint)
-
-		newUser.ffId = id
-		newUser.title = args[1]
-		newUser.gender = args[2]
-		newUser.firstName = args[3]
-		newUser.lastName = args[4]
-		newUser.dob = args[5]
-		newUser.email = args[6]
-		newUser.userAdd.addressLine = args[7]
-		newUser.userAdd.city = args[8]
-		newUser.userAdd.zip = args[9]
-		newUser.userAdd.country = args[10]
-		newUser.createdBy = args[11]
-		newUser.totalPoint = tPoint
-
-		newUserDataAddress = &newUser
-
-	newUserByteArray, err = json.Marshal(newUserDataAddress)
-
-	err = stub.PutState(idString, newUserByteArray)
-
-	if err != nil {
-		return nil, errors.New("data cannot be pushed successfully. returned from registerNewUser")
-	}
-
-	return newUserByteArray, nil
-
-}
-*/
-
-func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+func (t *SimpleChaincode) registerUser(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	var err error
 	var newUserByteArray []byte
-	var userId string
-	//var userDetails string
 
-	fmt.Println("Inside Init . This is used to create an new User")
-	fmt.Println("Inside registerNewUser")
+	newUser := User{}
 
-	var newUser User
+	newUser.FfId = args[0]
+	newUser.Title = args[1]
+	newUser.Gender = args[2]
+	newUser.FirstName = args[3]
+	newUser.LastName = args[4]
+	newUser.Dob = args[5]
+	newUser.Email = args[6]
+	newUser.Address = args[7]
+	newUser.City = args[8]
+	newUser.Zip = args[9]
+	newUser.Country = args[10]
+	newUser.CreatedBy = args[11]
+	newUser.TotalPoint = args[12]
 
-	newUser.ffId = args[0]
-	newUser.title = args[1]
-	newUser.gender = args[2]
-	newUser.firstName = args[3]
-	newUser.lastName = args[4]
-	newUser.dob = args[5]
-	newUser.email = args[6]
-	newUser.addressLine = args[7]
-	newUser.city = args[8]
-	newUser.zip = args[9]
-	newUser.country = args[10]
-	newUser.createdBy = args[11]
-	newUser.totalPoint = args[12]
+	// Marshal newUser to convert it into bytes and store in Block chain.
+	newUserByteArray, err = json.Marshal(newUser)
 
-	newUserByteArray, err = json.Marshal(&newUser)
-
-	err = stub.PutState(userId, newUserByteArray)
+	err = stub.PutState(newUser.FfId, newUserByteArray)
 
 	if err != nil {
 		fmt.Println("Could not save userDetails to ledger", err)
 		return nil, err
 
 	}
-	//newUserByteArray, err = t.registerNewUser(stub, args)
 
-	return nil, nil
+	return newUserByteArray, nil
+
+}
+
+func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+
+	var err error
+	var bytes []byte
+
+	if len(args) == 13 {
+
+		bytes, err = t.registerUser(stub, function, args)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return bytes, nil
+
+	}
+
+	return nil, errors.New("Add 13 arguments")
 
 }
 
@@ -142,17 +101,13 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 	var userDataBytes []byte
 	var points int
 
-	if len(args) != 2 {
+	if len(args) != 3 {
 		return nil, errors.New("must have two arguments")
 	}
 
 	var userId = args[0]
 
-	fmt.Println("userId : ")
-	fmt.Print(userId)
-
-	var existingUser User
-
+	existingUser := User{}
 	userDataBytes, err = stub.GetState(userId)
 
 	if err != nil {
@@ -165,32 +120,22 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		return nil, errors.New("Problem in unmarshalling data")
 	}
 
-	fmt.Print("existingUser.totalPoint ")
-	fmt.Println(existingUser.totalPoint)
-
-	pointsrecieved := existingUser.totalPoint
+	pointsrecieved := existingUser.TotalPoint
 
 	points, err = strconv.Atoi(pointsrecieved)
 
-	if function == "addPoints" {
+	if function == "addDeletePoints" {
 
-		fmt.Println("Inside addPoints")
+		fmt.Println("Inside addDeletePoints")
 
-		newPoints = t.addPoints(stub, args, points)
-
-	}
-
-	if function == "deletePonts" {
-
-		fmt.Println("Inside deletePoints")
-
-		newPoints = t.deletePoints(stub, args, points)
+		newPoints = t.addDeletePoints(stub, args, points)
 
 	}
-	fmt.Println("back from addPoints method inside invoke . points to be added are : ")
+
+	// After addition or subtraction of points,  Store points back to the ledger.
 
 	var finalPointsStr = strconv.Itoa(newPoints)
-	existingUser.totalPoint = finalPointsStr
+	existingUser.TotalPoint = finalPointsStr
 	userDataBytes, err = json.Marshal(&existingUser)
 
 	err = stub.PutState(userId, userDataBytes)
@@ -199,51 +144,28 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 
 }
 
-func (t *SimpleChaincode) addPoints(stub shim.ChaincodeStubInterface, args []string, points int) int {
+func (t *SimpleChaincode) addDeletePoints(stub shim.ChaincodeStubInterface, args []string, points int) int {
 
-	var numberOfPointsToAdd = args[1]
-	numberOfPointsInt, err := strconv.Atoi(numberOfPointsToAdd)
-
-	if err != nil {
-
-		return 0
-	}
-
-	fmt.Print("number of Points to add")
-	fmt.Println(numberOfPointsToAdd)
-
-	fmt.Print("number of Points currently")
-	fmt.Println(points)
-
-	points = points + numberOfPointsInt
-
-	fmt.Println("Points added and final result is ")
-	fmt.Print(points)
-
-	return points
-
-}
-
-func (t *SimpleChaincode) deletePoints(stub shim.ChaincodeStubInterface, args []string, points int) int {
-
-	var numberOfPointsToSub = args[1]
-	numberOfPointsInt, err := strconv.Atoi(numberOfPointsToSub)
+	var numberOfPointsToAddOrSub = args[1]
+	numberOfPointsInt, err := strconv.Atoi(numberOfPointsToAddOrSub)
 
 	if err != nil {
 
 		return 0
 	}
 
-	fmt.Print("number of Points to subtract")
-	fmt.Println(numberOfPointsToSub)
+	addOrDelete := args[2]
 
-	fmt.Print("number of Points Int currently")
-	fmt.Println(points)
+	fmt.Println(addOrDelete, " = fmt.Println(addOrDelete)")
 
-	points = points - numberOfPointsInt
+	if addOrDelete == "add" {
+		points = points + numberOfPointsInt
+	}
 
-	fmt.Println("Points subtracted and final result is ")
-	fmt.Print(points)
+	if addOrDelete == "delete" {
+		points = points - numberOfPointsInt
+
+	}
 
 	return points
 
@@ -251,6 +173,7 @@ func (t *SimpleChaincode) deletePoints(stub shim.ChaincodeStubInterface, args []
 
 func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var currentPoints []byte
+	var userdetails []byte
 	var err error
 
 	if len(args) != 1 {
@@ -260,28 +183,63 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 	if function == "getPoints" {
 		currentPoints, err = t.getPoints(stub, args)
 	}
-	if err != nil {
-		return nil, errors.New("returning from query with error. current points are not correct. Add points")
+	if function == "getUser" {
+		userdetails, err = t.getUser(stub, args)
 	}
-	return currentPoints, nil
+	if err != nil {
+		return nil, errors.New("returning from query with error. Current points or User Details are not correct.")
+	}
+
+	if function == "getPoints" {
+		return currentPoints, nil
+	}
+	if function == "getUser" {
+		return userdetails, nil
+	}
+
+	return nil, errors.New("getUser or getPoints did not worked properly")
+
+}
+
+func (t *SimpleChaincode) getUser(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var userId = args[0]
+
+	bytes, err := stub.GetState(userId)
+
+	if err != nil {
+
+		jsonResp := "{\"Error\":\"Failed to get state for " + userId + "\"}"
+		return nil, errors.New(jsonResp)
+
+	}
+
+	userRetrieved := User{}
+	err = json.Unmarshal(bytes, &userRetrieved)
+
+	jsonResp := []byte(" {\"TotalPoints\":\"" + userRetrieved.TotalPoint + "\"}" + " {\"FirstName\":\"" + userRetrieved.FirstName + "\"}" + " {\"LastName\":\"" + userRetrieved.LastName + "\"}" + " {\"Id\":\"" + userRetrieved.FfId + "\"}" + " {\"DOB\":\"" + userRetrieved.Dob + "\"}")
+
+	return jsonResp, nil
+
 }
 
 func (t *SimpleChaincode) getPoints(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 
 	var userId = args[0]
 
-	fmt.Println(userId)
-
 	bytes, err := stub.GetState(userId)
 
 	if err != nil {
-		var userRetrieved User
-		err = json.Unmarshal(bytes, &userRetrieved)
-		var currentPoints = userRetrieved.totalPoint
 
-		fmt.Println("currentPoints ")
-		fmt.Print(currentPoints)
+		jsonResp := "{\"Error\":\"Failed to get state for " + userId + "\"}"
+		return nil, errors.New(jsonResp)
+
 	}
-	return bytes, nil
+
+	userRetrieved := User{}
+	err = json.Unmarshal(bytes, &userRetrieved)
+
+	jsonResp := []byte("{\"TotalPoints\":\"" + userRetrieved.TotalPoint + "\"}")
+
+	return jsonResp, nil
 
 }
